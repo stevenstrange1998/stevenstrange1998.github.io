@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steven Strange · Software Engineer</title>
+<meta name="description" content="Software engineer working at the hardware–software boundary: C++ and Swift systems that turn raw depth-sensor data into manufacturing-grade measurements.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◮</text></svg>">
+</head>
+<body>
+
+<div class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-name" href="#top">steven strange <span>· software engineer</span></a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#work" class="always">Work</a>
+      <a href="research.html" class="always">Research</a>
+      <a href="#about">About</a>
+      <a href="#contact" class="always">Contact</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero" id="top">
+  <div class="hero-glow" id="heroGlow"></div>
+  <div class="wrap">
+    <p class="eyebrow fade-up">iOS · C++ · Computer Vision</p>
+    <h1>
+      <span class="line-mask"><span>I turn raw sensor data</span></span>
+      <span class="line-mask"><span>into products <span class="dim">you can</span></span></span>
+      <span class="line-mask"><span><span class="dim">hold in your hands.</span></span></span>
+    </h1>
+    <p class="hero-sub fade-up d1">
+      Software engineer working at the hardware–software boundary. C++ and Swift
+      systems that turn raw depth-sensor data into manufacturing-grade measurements.
+      Real-time processing on resource-constrained devices, sensor calibration, and
+      3D geometry, shipped end to end.
+    </p>
+    <div class="hero-meta fade-up d2">
+      <span class="status-chip"><span class="dot"></span>Lead iOS Engineer @ Faysics</span>
+      <span class="status-chip">Ohio, USA</span>
+    </div>
+  </div>
+  <span class="hero-scroll">Scroll</span>
+</header>
+
+<main>
+<section id="work">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Selected work</h2>
+      <span class="rule"></span>
+    </div>
+
+    <!-- Faysics -->
+    <article class="case">
+      <div class="case-text reveal">
+        <p class="case-kicker"><span class="year">2025–Present</span> · Lead iOS Developer · Sole engineer</p>
+        <h3>Faysics: glasses cut from a face scan</h3>
+        <p class="case-desc">
+          Prescription eyewear manufactured from measurements captured with the
+          iPhone's TrueDepth camera. Physical parts are cut from my measurements.
+          Errors cost money, so the pipeline is built for accuracy.
+        </p>
+        <ul class="case-points">
+          <li>Ported the Open3D C++ library to iOS/ARM64, cross-compiled, wrapped in Objective-C++, surfaced in Swift. RGB-D fusion, ICP registration, and pose tracking run entirely on device.</li>
+          <li>Depth frames stream from the sensor, fuse into a 3D face mesh, and measurements (interpupillary distance, face and nose width) are read directly from geometry.</li>
+          <li>Corrected systematic sensor error by aligning scans to a canonical reference and cancelling offsets between the ARKit and Vision coordinate systems.</li>
+          <li>Wrote the real-time AR try-on renderer: depth-buffer occlusion, physically based materials, head-pose smoothing at interactive frame rates.</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">C++</span><span class="tag">Objective-C++</span><span class="tag">Swift</span>
+          <span class="tag">Open3D</span><span class="tag">ARKit</span><span class="tag">Metal</span><span class="tag">ICP</span>
+        </div>
+      </div>
+      <div class="case-media reveal" style="--rd:.12s">
+        <div class="phone-cluster">
+          <div class="reel-stack">
+            <div class="reel">
+              <video muted loop playsinline preload="none" poster="Assets/web/faysics-scan-poster.jpg" aria-label="Screen recording of the Faysics 3D face-scanning pipeline">
+                <source src="Assets/web/faysics-scan.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="reel">
+              <video muted loop playsinline preload="none" poster="Assets/web/glasses-tryon-poster.jpg" aria-label="Screen recording of the real-time AR glasses try-on renderer">
+                <source src="Assets/web/glasses-tryon.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="media-caption">Depth capture → mesh · AR try-on renderer</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- Faysics deep dive: five-step pipeline overview -->
+    <div class="fpx reveal">
+      <div class="fpx-head">
+        <p class="case-kicker"><span class="year">Deep dive</span> · How the scan pipeline actually works</p>
+        <h3>From a phone scan to a lens the machine can cut</h3>
+        <p>
+          Turning a face into glasses that fit takes five steps: capture,
+          detection, 3D reconstruction, alignment, and measurement.
+        </p>
+      </div>
+
+      <div class="fpx-stats">
+        <div class="fpx-stat"><b data-count="105">0</b><span>reference points found on every face</span></div>
+        <div class="fpx-stat"><b data-count="1.2" data-decimals="1" data-suffix=" mm">0</b><span>resolution of the 3D face model</span></div>
+        <div class="fpx-stat"><b data-count="5">0</b><span>steps from scan to finished frame</span></div>
+        <div class="fpx-stat"><b data-count="100" data-suffix="%">0</b><span>on-device, no servers</span></div>
+      </div>
+
+      <div class="fpx-panel">
+        <div id="faysics-system"></div>
+      </div>
+    </div>
+
+    <!-- VisionTypePro -->
+    <article class="case flip">
+      <div class="case-text reveal">
+        <p class="case-kicker"><span class="year">2023</span> · Personal project</p>
+        <h3>VisionType Pro: an iPhone keyboard for Vision Pro</h3>
+        <p class="case-desc">
+          A device-to-device input link over Bluetooth and Wi-Fi that lets the
+          iPhone keyboard type on Apple Vision Pro, because pecking at a floating
+          keyboard in mid-air gets old fast.
+        </p>
+        <ul class="case-points">
+          <li>Built on MultipeerConnectivity: peer discovery, pairing, session state, and keystroke streaming handled across the full connection lifecycle.</li>
+          <li>Input latency kept low enough to feel native, so keystrokes appear on the headset as you type them.</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">Swift</span><span class="tag">visionOS</span>
+          <span class="tag">MultipeerConnectivity</span><span class="tag">Bluetooth / Wi-Fi</span>
+        </div>
+      </div>
+      <div class="case-media reveal" style="--rd:.12s">
+        <div style="width:100%">
+          <div class="screen">
+            <video controls preload="none" poster="Assets/web/visiontype-ad-poster.jpg" aria-label="VisionType Pro promotional video">
+              <source src="Assets/web/visiontype-ad.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="media-caption">Product film · 0:40</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- Number Canvas -->
+    <article class="case">
+      <div class="case-text reveal">
+        <p class="case-kicker"><span class="year">2026</span> · Full-stack personal project</p>
+        <h3>Number Canvas: a paint-by-numbers social network</h3>
+        <p class="case-desc">
+          Turn any photo into a paintable canvas, then share it to an
+          Instagram-style feed. Client-side computer vision, serverless backend,
+          designed and built end to end.
+        </p>
+        <ul class="case-points">
+          <li>Conversion pipeline turns photos into paintable canvases with superpixel segmentation, semantic masks, and edge detection, all on device.</li>
+          <li>Full backend on Cloudflare Workers and D1: relational schema, auth, canvas storage, and feed generation, running serverless at the edge.</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">Swift</span><span class="tag">Cloudflare Workers</span><span class="tag">D1 / SQL</span>
+          <span class="tag">Segmentation</span><span class="tag">Edge detection</span>
+        </div>
+      </div>
+      <div class="case-media reveal" style="--rd:.12s">
+        <div class="phone-cluster">
+          <div class="reel-stack">
+            <div class="reel">
+              <video muted loop playsinline preload="none" poster="Assets/web/number-canvas-poster.jpg" aria-label="Screen recording of the Number Canvas app: converting a photo and painting it">
+                <source src="Assets/web/number-canvas.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="media-caption">Photo → canvas → painted, in-app</p>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Research -->
+<section id="research" class="viz-root">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Research</h2>
+      <span class="rule"></span>
+    </div>
+
+    <div class="research-intro reveal">
+      <p class="case-kicker">2024 · Kent State University · 3-person team</p>
+      <h3 class="research-title">Brain-tumor detection in MRIs with convolutional neural networks</h3>
+      <p class="research-lede">
+        We built a CNN to sort brain MRIs into four diagnoses (glioma, meningioma,
+        pituitary tumor, or none) and pitted a network trained from scratch against
+        one built on pre-trained VGG16 features. The visualizations below are drawn
+        from the paper's own data; the first shows what the network actually does to a scan.
+      </p>
+    </div>
+
+    <div class="research-stats reveal">
+      <div class="rstat"><b data-count="7043">0</b><span>MRI images</span></div>
+      <div class="rstat"><b data-count="4">0</b><span>Tumor classes</span></div>
+      <div class="rstat"><b data-count="95" data-suffix="%">0</b><span>Transfer accuracy</span></div>
+      <div class="rstat"><b data-count="16.5" data-suffix="×" data-decimals="1">0</b><span>Faster iteration</span></div>
+    </div>
+
+    <div class="viz-grid" style="margin-top:20px">
+      <div class="viz-card wide reveal" id="viz-pipeline"></div>
+      <div class="viz-card reveal" id="viz-training"></div>
+      <div class="viz-card reveal" id="viz-confidence"></div>
+    </div>
+
+    <a class="research-card reveal" href="research.html" style="margin-top:20px">
+      <p class="case-kicker">Go deeper</p>
+      <h3>The dataset, the full architecture, and the paper</h3>
+      <p>
+        Step through every layer of both models in an interactive explorer, see the
+        data split, and read the complete write-up, re-typeset for the screen, with
+        the original PDF a click away.
+      </p>
+      <span class="card-cta">Open the research page <span class="arrow">→</span></span>
+    </a>
+  </div>
+</section>
+
+<!-- More projects -->
+<section id="more">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Also built</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="grid-2">
+      <div class="mini-card reveal">
+        <p class="case-kicker"><span class="year">2026–Present</span></p>
+        <h4>High-resolution image compositor</h4>
+        <p>
+          Aligns multiple telephoto frames onto a wide-angle base with SIFT feature
+          matching for super-resolution composites. A lightweight alignment path
+          keeps the live preview responsive while the full match runs behind it.
+        </p>
+        <div class="tags"><span class="tag">SIFT</span><span class="tag">OpenCV</span><span class="tag">Swift</span></div>
+      </div>
+      <div class="mini-card reveal" style="--rd:.1s">
+        <p class="case-kicker"><span class="year">2025</span></p>
+        <h4>On-device dog-behavior translator</h4>
+        <p>
+          Five models (vision, audio classification, speech recognition, language,
+          and speech synthesis) sequenced entirely on an iPhone within the
+          device's memory and latency budget. No server involved.
+        </p>
+        <div class="tags"><span class="tag">Core ML</span><span class="tag">Vision</span><span class="tag">On-device ML</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">About</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <p class="lede">
+          I like the part of software where the abstractions run out, where a
+          measurement has to be right because a machine is about to cut a physical
+          part from it.
+        </p>
+        <p>
+          As the sole engineer on Faysics I own everything from the depth sensor to
+          the App Store: capture, geometry processing, measurement extraction,
+          rendering, and release, profiled with Instruments to keep the
+          capture-to-mesh pipeline inside a phone's frame-time and memory budget.
+          Before that: a computer science degree from Kent State University (2024)
+          and a habit of building things that bridge devices, models, and people.
+        </p>
+      </div>
+      <div class="reveal" style="--rd:.1s">
+        <div class="skill-block">
+          <h5>Languages</h5>
+          <ul><li>C++</li><li>Objective-C++</li><li>Swift</li><li>Python</li><li>SQL</li></ul>
+        </div>
+        <div class="skill-block">
+          <h5>Systems</h5>
+          <ul><li>Real-time sensor processing</li><li>3D geometry: ICP, point clouds, meshes</li><li>Multithreading</li><li>Cross-compilation</li><li>P2P protocols</li></ul>
+        </div>
+        <div class="skill-block">
+          <h5>Tools &amp; platforms</h5>
+          <ul><li>iOS / ARM64</li><li>Xcode + Instruments</li><li>OpenCV</li><li>Core ML / Vision</li><li>Cloudflare Workers + D1</li><li>Git</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <p class="eyebrow reveal">05 · Contact</p>
+    <h2 class="reveal">Let's build something<br>that has to be right.</h2>
+    <div class="reveal" style="--rd:.1s">
+      <a class="email-link" href="mailto:stevenstrange1998@gmail.com">stevenstrange1998@gmail.com</a>
+    </div>
+    <div class="contact-meta reveal" style="--rd:.18s">
+      <a href="https://github.com/sstrange259" target="_blank" rel="noopener">GitHub ↗</a>
+      <span>Ohio, USA</span>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>© 2026 Steven Strange</span>
+    <span>Designed &amp; built by hand</span>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script src="viz.js"></script>
+<script src="faysics.js"></script>
+</body>
+</html>

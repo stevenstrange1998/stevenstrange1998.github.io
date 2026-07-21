@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain-Tumor Detection with CNNs · Steven Strange</title>
+<meta name="description" content="Interactive walkthrough of a CNN research project: four-class brain-tumor classification in MRI scans, custom architecture vs. VGG16 transfer learning.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◮</text></svg>">
+</head>
+<body class="viz-root">
+
+<div class="progress-bar" aria-hidden="true"></div>
+
+<div class="nav scrolled" id="nav">
+  <div class="nav-inner">
+    <a class="nav-name" href="index.html">steven strange <span>· research</span></a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html#work" class="always">Work</a>
+      <a href="#findings" class="always">Findings</a>
+      <a href="#paper" class="always">Paper</a>
+    </nav>
+  </div>
+</div>
+
+<header class="paper-hero">
+  <div class="wrap">
+    <a class="back-link fade-up" href="index.html"><span class="arrow">←</span> Back to portfolio</a>
+    <p class="eyebrow fade-up" style="margin-top:36px">Research · Kent State University · 2024</p>
+    <h1>
+      <span class="line-mask"><span>Brain-tumor detection</span></span>
+      <span class="line-mask"><span><span class="dim">using convolutional</span></span></span>
+      <span class="line-mask"><span><span class="dim">neural networks</span></span></span>
+    </h1>
+    <div class="paper-authors fade-up d1">
+      <span class="me">Steven Strange</span>
+      <span>Suwei Gao</span>
+      <span>Lalith Kumar Done</span>
+      <span><i>Kent State University · Kent, Ohio</i></span>
+    </div>
+    <div class="paper-actions fade-up d2">
+      <a class="btn primary" href="#findings">Explore the findings ↓</a>
+      <a class="btn" href="#paper">Read the paper</a>
+      <a class="btn" href="Assets/web/brain-tumor-cnn-research.pdf" download>Download PDF</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ============================ FINDINGS ============================ -->
+<section id="findings">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">The findings, visualized</h2>
+      <span class="rule"></span>
+    </div>
+
+    <div class="research-stats reveal" style="margin-bottom:20px">
+      <div class="rstat"><b data-count="7043">0</b><span>Labeled MRI images</span></div>
+      <div class="rstat"><b data-count="4">0</b><span>Diagnostic classes</span></div>
+      <div class="rstat"><b data-count="95" data-suffix="%">0</b><span>Transfer-learning accuracy</span></div>
+      <div class="rstat"><b data-count="16.5" data-suffix="×" data-decimals="1">0</b><span>Faster training iteration</span></div>
+    </div>
+
+    <div class="viz-grid">
+
+      <!-- CNN forward-pass pipeline -->
+      <div class="viz-card wide reveal" id="viz-pipeline"></div>
+
+      <!-- Training curves (real data) -->
+      <div class="viz-card reveal" id="viz-training"></div>
+
+      <!-- Confidence / prediction probabilities (real data) -->
+      <div class="viz-card reveal" id="viz-confidence"></div>
+
+      <!-- Dataset -->
+      <div class="viz-card reveal">
+        <h4>The dataset</h4>
+        <p class="viz-sub">7,043 labeled MRI scans from the Kaggle Brain Tumor MRI Dataset, split for supervised training.</p>
+        <div id="viz-dataset"></div>
+        <div class="classes">
+          <div class="class-chip"><b>Glioma</b><span>Tumor of the glial cells, the most common malignant brain tumor</span></div>
+          <div class="class-chip"><b>Meningioma</b><span>Arises in the meninges surrounding the brain; usually benign</span></div>
+          <div class="class-chip"><b>Pituitary</b><span>Grows in the pituitary gland at the base of the brain</span></div>
+          <div class="class-chip"><b>No tumor</b><span>Healthy control scans, so the model must also know when to say "nothing"</span></div>
+        </div>
+        <details class="table-toggle">
+          <summary>View as table</summary>
+          <table>
+            <thead><tr><th scope="col">Split</th><th scope="col">Images</th><th scope="col">Share</th></tr></thead>
+            <tbody>
+              <tr><td>Training</td><td>5,712</td><td>81%</td></tr>
+              <tr><td>Testing (incl. validation split)</td><td>1,331</td><td>19%</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </div>
+
+      <!-- Architecture explorer -->
+      <div class="viz-card reveal">
+        <h4>Architecture explorer</h4>
+        <p class="viz-sub">Every layer of both models, as described in the paper. Select a layer to see what it does and why it's there.</p>
+        <div class="arch-tabs" role="tablist" aria-label="Model architecture">
+          <button class="arch-tab" role="tab" id="tab-custom" aria-selected="true" aria-controls="arch-flow">Custom CNN</button>
+          <button class="arch-tab" role="tab" id="tab-vgg" aria-selected="false" aria-controls="arch-flow">VGG16 transfer learning</button>
+        </div>
+        <div class="arch-flow" id="arch-flow" role="tablist" aria-label="Network layers"></div>
+        <div class="arch-detail" id="arch-detail" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Takeaways -->
+    <div class="takeaways" style="margin-top:20px">
+      <div class="takeaway reveal">
+        <span class="num">Takeaway 01</span>
+        <h4>Pretrained features are a head start you can't train around</h4>
+        <p>With an identical epoch budget, VGG16's ImageNet-learned edge and texture detectors transferred cleanly to MRI scans: ~95% vs ~80% for the same network trained from random weights.</p>
+      </div>
+      <div class="takeaway reveal" style="--rd:.08s">
+        <span class="num">Takeaway 02</span>
+        <h4>Confidence transferred too, not just accuracy</h4>
+        <p>The transfer-learning model gave sharply confident predictions; the custom CNN stayed uncertain even when it landed on the right class, a meaningful difference for a tool meant to triage scans for radiologists.</p>
+      </div>
+      <div class="takeaway reveal" style="--rd:.16s">
+        <span class="num">Takeaway 03</span>
+        <h4>The pipeline is part of the model</h4>
+        <p>Rewriting the data-loading and preprocessing pipeline cut training iteration time 16.5×, which is what made comparing architectures and augmentation strategies practical at all.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PAPER ============================ -->
+<section id="paper">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">The paper</h2>
+      <span class="rule"></span>
+    </div>
+
+    <div class="reader">
+      <nav class="toc" aria-label="Paper contents">
+        <a href="#p-abstract" class="active">Abstract</a>
+        <a href="#p-motivation">I · Motivation</a>
+        <a href="#p-description">II · Project description</a>
+        <a href="#p-design">III · Project design</a>
+        <a href="#p-implementation">IV · Implementation</a>
+        <a href="#p-results">V · Results</a>
+        <a href="#p-references">References</a>
+      </nav>
+
+      <div class="paper-body">
+        <section id="p-abstract">
+          <div class="abstract">
+            <p>
+              One of the most serious medical issues is brain tumors, which must be
+              diagnosed promptly and accurately to enhance patient outcomes.
+              Automated, AI-driven solutions are necessary because manual brain MRI
+              scan analysis is frequently laborious and prone to human error. This
+              research uses TensorFlow to create a convolutional neural network
+              (CNN) that can identify brain tumors from MRI images. The model
+              trains on labeled datasets to attain high tumor-identification
+              accuracy after preprocessing MRI images to improve quality.
+              Optimizing computational performance, managing imbalanced datasets,
+              and data augmentation were among the main obstacles. By providing a
+              quicker and more accurate tool to help radiologists diagnose brain
+              tumors, the developed system exemplifies the potential of AI in
+              healthcare.
+            </p>
+          </div>
+        </section>
+
+        <section id="p-motivation">
+          <h3><span class="n">I</span>Motivation</h3>
+          <p>
+            Magnetic resonance imaging (MRI) is a key tool in diagnosing and
+            managing brain tumors, but interpreting these scans has its challenges.
+            Even experienced radiologists can occasionally make mistakes due to
+            factors such as the large volume of work they handle daily. A study
+            published in <em>Radiology</em> highlights that subtle abnormalities or
+            high-pressure situations can lead to errors, making the case for tools
+            designed to enhance accuracy and support decision making [1].
+          </p>
+          <p>
+            MRI's importance in brain-tumor detection is difficult to overstate. It
+            provides detailed images of brain structures, enabling early
+            identification and understanding of tumors, and is particularly good at
+            highlighting soft-tissue differences. Timely MRIs significantly improve
+            patient outcomes by detecting tumors at treatable stages [2]. But the
+            rising demand for scans places increasing pressure on radiologists:
+            managing more volume while maintaining diagnostic standards is
+            increasingly difficult.
+          </p>
+          <p>
+            Neural networks offer a practical answer. Research shows they can
+            streamline routine tasks (identifying normal scans, flagging
+            abnormalities), letting radiologists focus on complex cases [3]. This
+            project explores convolutional neural networks for exactly that: CNNs
+            detect patterns in MRI scans that are hard for humans to identify
+            consistently [4], and they process large volumes fast enough to matter
+            clinically.
+          </p>
+        </section>
+
+        <section id="p-description">
+          <h3><span class="n">II</span>Project description</h3>
+          <p>
+            The system classifies brain MRIs into four categories (glioma,
+            meningioma, pituitary tumor, and no tumor) using a labeled dataset
+            split into training and test sets. The dataset was chosen for its
+            diversity and comprehensive representation of tumor types, which lets
+            the model generalize well across the four classes.
+          </p>
+          <p>
+            The project's core is a convolutional neural network. CNNs
+            automatically extract spatial and hierarchical features from images:
+            convolutional layers pull out local and global features from the
+            scans, while pooling layers reduce dimensionality. TensorFlow
+            implements the architecture end to end (preprocessing, layer
+            definitions, training, and evaluation), chosen for its flexibility,
+            scalability, and built-in tooling for deep learning workflows.
+          </p>
+        </section>
+
+        <section id="p-design">
+          <h3><span class="n">III</span>Project design</h3>
+          <h4>A · Data preparation</h4>
+          <p>
+            MRI images labeled across the four classes are divided into a training
+            set of 5,712 images and a test set of 1,331 images.
+          </p>
+          <h4>B · Preprocessing</h4>
+          <p>
+            All images are resized to a uniform resolution so every input has
+            identical dimensions, and pixel intensities are normalized to [0, 1],
+            bringing all features to a similar scale so the model learns
+            efficiently and converges faster.
+          </p>
+          <h4>C · Data augmentation</h4>
+          <p>
+            Rotations, flips, zooms, and shifts increase variability within each
+            class. The added diversity reduces overfitting and improves
+            generalization to unseen MRI scans.
+          </p>
+          <h4>D · Model building</h4>
+          <p>
+            Two models classify the same four categories: a custom CNN built from
+            scratch (stacked convolutional layers with ReLU activations,
+            max-pooling for downsampling, batch normalization for stable
+            convergence, dropout for regularization, then dense layers and a
+            four-way softmax) and a transfer-learning model using VGG16
+            pretrained on ImageNet as a frozen feature extractor with new custom
+            layers on top.
+          </p>
+          <h4>E · Training</h4>
+          <p>
+            Both models trained on the augmented dataset with 20% held out for
+            validation. The custom CNN used the Adam optimizer at a learning rate
+            of 0.001 with categorical cross-entropy loss, early stopping, and a
+            learning-rate-reduction callback. The VGG16 model first trained only
+            its custom head with the base frozen at a lower learning rate of
+            0.0001, then selectively unfroze base layers for a second fine-tuning
+            pass.
+          </p>
+          <h4>F · Evaluation</h4>
+          <p>
+            Accuracy, loss, and confusion matrices on the held-out test set. The
+            custom CNN classified successfully but needed more epochs and compute;
+            VGG16 showed better accuracy and generalization in less training time,
+            a clear demonstration of transfer learning's advantage for medical
+            imaging.
+          </p>
+        </section>
+
+        <section id="p-implementation">
+          <h3><span class="n">IV</span>Implementation</h3>
+          <p>
+            The dataset is the Kaggle Brain Tumor MRI Dataset [8]: 7,043 labeled
+            images across the four classes, organized as 5,712 training and 1,331
+            test images, with the test set further split into validation and test
+            subsets. Images were resized to 224×224 pixels, and the training set
+            was augmented with horizontal flips, brightness adjustments, and small
+            positional shifts.
+          </p>
+          <p>
+            The custom CNN starts with a convolutional layer of 32 filters (3×3,
+            ReLU) extracting edges and textures, followed by a second convolutional
+            layer of 64 filters (3×3, ReLU) for more complex patterns. Each is
+            followed by 2×2 max pooling and 20% dropout. The feature maps are
+            flattened and passed through a 128-neuron dense layer with batch
+            normalization, then a 64-neuron dense layer with 10% dropout, and
+            finally a four-neuron softmax output.
+          </p>
+          <p>
+            The transfer-learning model keeps VGG16's convolutional layers (a deep
+            architecture trained on millions of ImageNet images [9]) intact as a
+            feature extractor. Its flattened output feeds an identical head: dense
+            128 with batch normalization and dropout, dense 64 with dropout, and a
+            four-way softmax classifier.
+          </p>
+        </section>
+
+        <section id="p-results">
+          <h3><span class="n">V</span>Results</h3>
+          <p>
+            After training for 20 epochs, the custom CNN reached an accuracy of
+            around 80%. In the same number of epochs, the model built on VGG16
+            reached around 95%.
+          </p>
+          <p>
+            The results demonstrate the effectiveness of transfer learning for
+            image classification: not only were better results achieved, but higher
+            accuracy arrived in fewer epochs. When classifying images, the
+            transfer-learning model also gave more confident predictions, while
+            the custom CNN carried more uncertainty even when it arrived at the
+            correct classification.
+          </p>
+        </section>
+
+        <section id="p-references">
+          <h3><span class="n">VII</span>References</h3>
+          <ol class="refs">
+            <li>S. Van der Gijp, M. R. Ravesloot, R. H. van Wijnhoven, et al., "Radiological error in daily practice: fatigue and cognitive overload as root causes," <em>European Journal of Radiology</em>, vol. 144, 2023. <a href="https://www.ejradiology.com" target="_blank" rel="noopener">ejradiology.com</a></li>
+            <li>"Can an MRI detect a brain tumor?" American Health Imaging Network, 2023. <a href="https://neurolaunch.com/can-an-mri-detect-a-brain-tumor" target="_blank" rel="noopener">neurolaunch.com</a></li>
+            <li>Lamontagne, "AI shows potential to reduce radiologists' chest x-ray workload in outpatient settings," <em>Radiology Business</em>, 2023. <a href="https://radiologybusiness.com" target="_blank" rel="noopener">radiologybusiness.com</a></li>
+            <li>D. Gupta, M. R. Shah, et al., "Deep learning-based CNNs for medical imaging: application to brain tumor detection," <em>BMC Medical Imaging</em>, vol. 24, no. 1, 2024. <a href="https://bmcmedimaging.biomedcentral.com/articles/10.1186/s12880-024-01292-7" target="_blank" rel="noopener">bmcmedimaging.biomedcentral.com</a></li>
+            <li>M. Sharma, P. Sharma, R. Mittal, K. Gupta, "Brain tumour detection using machine learning," <em>Journal of Electronics and Informatics</em>, vol. 3, 2021. doi:10.36548/jei.2021.4.005</li>
+            <li>S. Asif, W. Yi, Q. U. Ain, J. Hou, T. Yi, J. Si, "Improving effectiveness of different deep transfer learning-based models for detecting brain tumors from MR images," <em>IEEE Access</em>, vol. 10, pp. 34716–34730, 2022. doi:10.1109/ACCESS.2022.3153306</li>
+            <li>Z. Jia, D. Chen, "Brain tumor identification and classification of MRI images using deep learning techniques," <em>IEEE Access</em>, 2020. doi:10.1109/ACCESS.2020.3016319</li>
+            <li>M. Nickparvar, "Brain Tumor MRI Dataset," Kaggle, 2021. doi:10.34740/KAGGLE/DSV/2645886. <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset" target="_blank" rel="noopener">kaggle.com</a></li>
+            <li>K. Simonyan, A. Zisserman, "Very deep convolutional networks for large-scale image recognition," arXiv, 2014. <a href="https://arxiv.org/abs/1409.1556" target="_blank" rel="noopener">arxiv.org/abs/1409.1556</a></li>
+          </ol>
+        </section>
+
+        <div class="paper-actions">
+          <a class="btn" href="Assets/web/brain-tumor-cnn-research.pdf" download>Download the original PDF</a>
+          <a class="btn" href="#findings">Back to the findings ↑</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>© 2026 Steven Strange</span>
+    <span><a href="index.html">← Back to portfolio</a></span>
+  </div>
+</footer>
+
+<div class="chart-tooltip" id="tooltip" role="status"></div>
+
+<script src="main.js"></script>
+<script src="viz.js"></script>
+</body>
+</html>
